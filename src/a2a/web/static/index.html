@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>A2A Hub</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <header>
+    <h1>A2A Hub</h1>
+    <div id="status">
+      <span id="status-dot"></span>
+      <span id="status-text">connecting...</span>
+      <span id="agent-count">0 agents</span>
+    </div>
+  </header>
+
+  <main>
+    <section id="agents-panel" class="panel">
+      <h2>Agents</h2>
+      <div id="agents-list"></div>
+    </section>
+
+    <section id="events-panel" class="panel">
+      <h2>Event Stream</h2>
+      <div id="events-list"></div>
+    </section>
+
+    <section id="topology-panel" class="panel">
+      <h2>Topology</h2>
+      <svg id="topology-svg"></svg>
+    </section>
+  </main>
+
+  <footer>
+    <span id="ws-status">ws: connecting</span>
+  </footer>
+
+  <script src="/app.js"></script>
+</body>
+</html>

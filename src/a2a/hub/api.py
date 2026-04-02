@@ -1,10 +1,12 @@
 """HTTP + WebSocket API routes for the hub."""
 import json
+from pathlib import Path
 
 from starlette.applications import Starlette
 from starlette.requests import Request
 from starlette.responses import JSONResponse
-from starlette.routing import Route, WebSocketRoute
+from starlette.routing import Mount, Route, WebSocketRoute
+from starlette.staticfiles import StaticFiles
 from starlette.websockets import WebSocket, WebSocketDisconnect
 
 from a2a.hub.envelope import Envelope
@@ -26,6 +28,21 @@ async def list_agents(request: Request) -> JSONResponse:
         }
         for a in agents
     ])
+
+
+async def list_watches(request: Request) -> JSONResponse:
+    agents = registry.list_agents()
+    watches = []
+    for agent in agents:
+        for target_id in registry.get_watched_by(agent.agent_id):
+            target = registry.get_agent(target_id)
+            watches.append({
+                "watcher_id": agent.agent_id,
+                "watcher_name": agent.name,
+                "target_id": target_id,
+                "target_name": target.name if target else "unknown",
+            })
+    return JSONResponse(watches)
 
 
 async def hook_ingest(request: Request) -> JSONResponse:
@@ -114,6 +131,11 @@ async def agent_ws(websocket: WebSocket):
                 target_id = msg.get("target_id")
                 try:
                     registry.watch(agent_id, target_id)
+                    await router.route(Envelope(
+                        from_agent=agent_id,
+                        type="status",
+                        payload={"event": "watch", "target_id": target_id},
+                    ))
                     await websocket.send_text(json.dumps({
                         "response": "watching",
                         "target_id": target_id,
@@ -127,6 +149,11 @@ async def agent_ws(websocket: WebSocket):
                     continue
                 target_id = msg.get("target_id")
                 registry.unwatch(agent_id, target_id)
+                await router.route(Envelope(
+                    from_agent=agent_id,
+                    type="status",
+                    payload={"event": "unwatch", "target_id": target_id},
+                ))
                 await websocket.send_text(json.dumps({
                     "response": "unwatched",
                     "target_id": target_id,
@@ -177,11 +204,14 @@ async def dashboard_ws(websocket: WebSocket):
 
 
 def create_app() -> Starlette:
-    return Starlette(
-        routes=[
-            Route("/api/agents", list_agents, methods=["GET"]),
-            Route("/api/hook-ingest", hook_ingest, methods=["POST"]),
-            WebSocketRoute("/ws/agent", agent_ws),
-            WebSocketRoute("/ws/dashboard", dashboard_ws),
-        ],
-    )
+    static_dir = Path(__file__).parent.parent / "web" / "static"
+    routes = [
+        Route("/api/agents", list_agents, methods=["GET"]),
+        Route("/api/watches", list_watches, methods=["GET"]),
+        Route("/api/hook-ingest", hook_ingest, methods=["POST"]),
+        WebSocketRoute("/ws/agent", agent_ws),
+        WebSocketRoute("/ws/dashboard", dashboard_ws),
+    ]
+    if static_dir.exists():
+        routes.append(Mount("/", app=StaticFiles(directory=str(static_dir), html=True)))
+    return Starlette(routes=routes)

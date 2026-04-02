@@ -23,6 +23,13 @@
 - Watcher-side protection: if a watcher's context window is filling up, signal the hub to throttle or batch events
 - Dashboard throttling: aggregate/sample events if volume exceeds what the UI can render
 
+## Automatic Error Capture (Hooks)
+- PostToolUse hook on Bash that auto-forwards stderr/errors to the hub
+- Removes the need for agents to manually `emit` errors
+- Hook script exists at `src/a2a/hooks/post_bash.sh`, installer at `src/a2a/hooks/install.py`
+- Needs investigation: hook must be installed before Claude session starts (hooks are read at startup)
+- `/connect` skill should install the hook and prompt a session restart if needed
+
 ## Network Support
 - Make hub URL configurable (replace hardcoded `127.0.0.1:7800`)
 - Add TLS for remote connections

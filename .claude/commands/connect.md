@@ -11,12 +11,11 @@ The argument $ARGUMENTS is the agent's display name.
 2. Call the `connect` tool with the name "$ARGUMENTS". If no name was provided, use "agent" as the default.
 
 3. The tool returns a JSON response with `agent_id`. Extract it and save it:
-   - Create the directory `~/.a2a/` if it doesn't exist
-   - Write the agent_id to `~/.a2a/agent_id`
+   - Create the directory `~/.a2a/` if it doesn't exist: `mkdir -p ~/.a2a`
+   - Write the agent_id to `~/.a2a/agent_id`: `echo "<agent_id>" > ~/.a2a/agent_id`
 
 4. Tell the user:
    - Their agent name and ID
-   - That errors from Bash commands will be automatically forwarded to watchers (once hooks are set up)
    - That they can use the `emit` tool to send curated updates to anyone watching them
    - That other agents can watch them using `/watch <agent_id>`
 
