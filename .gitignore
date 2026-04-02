@@ -5,5 +5,6 @@ __pycache__/
 .pytest_cache/
 dist/
 build/
-.claude/
+.claude/*
+!.claude/commands/
 ~/.a2a/
