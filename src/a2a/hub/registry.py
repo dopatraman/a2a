@@ -67,5 +67,13 @@ class Registry:
     def get_agent(self, agent_id: str) -> AgentRecord | None:
         return self._agents.get(agent_id)
 
+    def get_agent_by_name(self, name: str) -> AgentRecord | None:
+        matches = [a for a in self._agents.values() if a.name == name]
+        if len(matches) > 1:
+            raise ValueError(
+                f"Multiple agents named '{name}' — use list_agents to disambiguate"
+            )
+        return matches[0] if matches else None
+
     def list_agents(self) -> list[AgentRecord]:
         return list(self._agents.values())

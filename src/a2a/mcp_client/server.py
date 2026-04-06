@@ -51,6 +51,8 @@ async def ws_demux(ws):
                 payload = msg.get("payload", {})
                 content = json.dumps(payload) if isinstance(payload, dict) else str(payload)
                 meta = {"from": from_name, "type": event_type}
+                if msg.get("to_agent"):
+                    meta["direct"] = "true"
                 if _session:
                     await send_channel_event(_session, content, meta)
             else:

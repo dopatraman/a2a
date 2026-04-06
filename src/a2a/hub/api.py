@@ -159,6 +159,37 @@ async def agent_ws(websocket: WebSocket):
                     "target_id": target_id,
                 }))
 
+            elif action == "send":
+                if not agent_id:
+                    await websocket.send_text(json.dumps({"error": "not connected"}))
+                    continue
+                to_name = msg.get("to")
+                if not to_name:
+                    await websocket.send_text(json.dumps({"error": "missing 'to' field"}))
+                    continue
+                try:
+                    target = registry.get_agent_by_name(to_name)
+                except ValueError as e:
+                    await websocket.send_text(json.dumps({"error": str(e)}))
+                    continue
+                if target is None:
+                    await websocket.send_text(json.dumps({"error": f"agent '{to_name}' not found"}))
+                    continue
+                envelope = Envelope(
+                    from_agent=agent_id,
+                    to_agent=target.agent_id,
+                    type="direct",
+                    payload={
+                        "content": msg.get("content", ""),
+                        "context": msg.get("context", {}),
+                    },
+                )
+                await router.route(envelope)
+                await websocket.send_text(json.dumps({
+                    "response": "sent",
+                    "to": to_name,
+                }))
+
             elif action == "list_agents":
                 agents = registry.list_agents()
                 await websocket.send_text(json.dumps({

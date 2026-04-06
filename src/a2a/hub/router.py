@@ -30,16 +30,24 @@ class EventRouter:
             pass
 
     async def route(self, envelope: Envelope) -> None:
-        # Deliver to watchers of the sender
-        watchers = self._registry.get_watchers(envelope.from_agent)
-        for watcher_id in watchers:
-            listener = self._listeners.get(watcher_id)
+        if envelope.to_agent is not None:
+            # Direct message — deliver only to the target agent
+            listener = self._listeners.get(envelope.to_agent)
             if listener is not None:
                 result = listener(envelope)
                 if result is not None:
                     await result
+        else:
+            # Broadcast — deliver to watchers of the sender
+            watchers = self._registry.get_watchers(envelope.from_agent)
+            for watcher_id in watchers:
+                listener = self._listeners.get(watcher_id)
+                if listener is not None:
+                    result = listener(envelope)
+                    if result is not None:
+                        await result
 
-        # Deliver to all dashboard listeners
+        # Dashboard listeners always receive everything
         for listener in self._dashboard_listeners:
             result = listener(envelope)
             if result is not None:

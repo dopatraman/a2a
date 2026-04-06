@@ -30,7 +30,7 @@ class TestToolList:
         handler = ToolHandler(ws=None)
         tools = handler.get_tools()
         names = {t.name for t in tools}
-        assert names == {"connect", "disconnect", "emit", "watch", "unwatch", "list_agents"}
+        assert names == {"connect", "disconnect", "emit", "send", "watch", "unwatch", "list_agents"}
 
     def test_tools_have_input_schemas(self):
         handler = ToolHandler(ws=None)
@@ -64,6 +64,16 @@ class TestToolMessages:
         handler, ws = make_handler([{"response": "unwatched", "target_id": "abc123"}])
         await handler.call("unwatch", {"agent_id": "abc123"})
         assert ws.sent == [{"action": "unwatch", "target_id": "abc123"}]
+
+    async def test_send_sends_ws_message(self):
+        handler, ws = make_handler([{"response": "sent", "to": "bob"}])
+        await handler.call("send", {"to": "bob", "message": "hello", "context": {"file": "x.py"}})
+        assert ws.sent == [{"action": "send", "to": "bob", "content": "hello", "context": {"file": "x.py"}}]
+
+    async def test_send_without_context(self):
+        handler, ws = make_handler([{"response": "sent", "to": "bob"}])
+        await handler.call("send", {"to": "bob", "message": "hello"})
+        assert ws.sent == [{"action": "send", "to": "bob", "content": "hello"}]
 
     async def test_list_agents_sends_ws_message(self):
         handler, ws = make_handler([{"response": "agents", "agents": []}])

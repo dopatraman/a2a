@@ -63,6 +63,19 @@ class ToolHandler:
                 },
             ),
             Tool(
+                name="send",
+                description="Send a direct message to a specific agent by name",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "to": {"type": "string", "description": "Name of the target agent"},
+                        "message": {"type": "string", "description": "Message content"},
+                        "context": {"type": "object", "description": "Optional context metadata"},
+                    },
+                    "required": ["to", "message"],
+                },
+            ),
+            Tool(
                 name="list_agents",
                 description="List all agents connected to the A2A hub",
                 inputSchema={"type": "object", "properties": {}},
@@ -87,6 +100,14 @@ class ToolHandler:
             msg = {"action": "watch", "target_id": arguments["agent_id"]}
         elif name == "unwatch":
             msg = {"action": "unwatch", "target_id": arguments["agent_id"]}
+        elif name == "send":
+            msg = {
+                "action": "send",
+                "to": arguments["to"],
+                "content": arguments["message"],
+            }
+            if arguments.get("context"):
+                msg["context"] = arguments["context"]
         elif name == "list_agents":
             msg = {"action": "list_agents"}
         else:

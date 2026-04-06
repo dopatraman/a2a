@@ -122,6 +122,37 @@ class TestRegistryWatch:
         assert reg.get_watchers(alice) == {bob}
 
 
+class TestRegistryGetAgentByName:
+    def test_found(self):
+        reg = Registry()
+        agent_id = reg.connect("alice")
+        agent = reg.get_agent_by_name("alice")
+        assert agent is not None
+        assert agent.agent_id == agent_id
+
+    def test_not_found(self):
+        reg = Registry()
+        reg.connect("alice")
+        assert reg.get_agent_by_name("bob") is None
+
+    def test_empty_registry(self):
+        reg = Registry()
+        assert reg.get_agent_by_name("alice") is None
+
+    def test_ambiguous_name_raises(self):
+        reg = Registry()
+        reg.connect("alice")
+        reg.connect("alice")
+        with pytest.raises(ValueError, match="Multiple agents"):
+            reg.get_agent_by_name("alice")
+
+    def test_after_disconnect(self):
+        reg = Registry()
+        agent_id = reg.connect("alice")
+        reg.disconnect(agent_id)
+        assert reg.get_agent_by_name("alice") is None
+
+
 class TestRegistryGetAgent:
     def test_get_agent(self):
         reg = Registry()
