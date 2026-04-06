@@ -3,6 +3,7 @@
 VENV := .venv/bin
 
 install:
+	$(VENV)/pip install --upgrade pip
 	$(VENV)/pip install -e ".[dev]"
 
 hub:
