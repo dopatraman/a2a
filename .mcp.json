@@ -1,8 +1,0 @@
-{
-  "mcpServers": {
-    "a2a": {
-      "command": "/Users/pvenkat/Projects/a2a/.venv/bin/python",
-      "args": ["/Users/pvenkat/Projects/a2a/src/a2a/mcp_client/server.py"]
-    }
-  }
-}

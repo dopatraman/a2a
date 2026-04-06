@@ -8,3 +8,4 @@ build/
 .claude/*
 !.claude/commands/
 ~/.a2a/
+.mcp.json
